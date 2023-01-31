@@ -1,16 +1,7 @@
 # dof_calculator
 
-A new Flutter project.
+The application designed to calculate the depth of field.
+These are preview app screenshots: light and dark themes.
+Localization, help tab and settings are in progress.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![image](https://user-images.githubusercontent.com/60883481/215850525-69cb7dbe-6bf4-418f-a25f-ff53aa37a278.png) ![image](https://user-images.githubusercontent.com/60883481/215851077-c0520f87-96fa-4a72-97cf-d66d3edfd92f.png)
