@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        disabledColor: Colors.deepPurple[200],
         canvasColor: Colors.deepPurple[100],
         inputDecorationTheme: InputDecorationTheme(
           labelStyle: const TextStyle(fontWeight: FontWeight.bold),
@@ -39,9 +40,14 @@ class MyApp extends StatelessWidget {
             color: Colors.grey[600],
             fontWeight: FontWeight.bold,
           ),
+          bodyLarge: TextStyle(
+              color: Colors.deepPurple[900],
+              fontWeight: FontWeight.bold,
+              fontSize: 16),
         ),
       ),
       darkTheme: ThemeData(
+        disabledColor: Colors.grey[800],
         appBarTheme: AppBarTheme(
             backgroundColor: Colors.grey[800],
             actionsIconTheme: const IconThemeData(color: Colors.white)),
@@ -75,6 +81,8 @@ class MyApp extends StatelessWidget {
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
+          bodyLarge: TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ),
       home: Home.create(),

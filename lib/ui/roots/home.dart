@@ -38,16 +38,21 @@ class _HomeViewModel extends ChangeNotifier {
   var circleTec = TextEditingController();
   _HomeViewModel({required this.context}) {
     apertureTec.addListener(() {
-      state = state.copyWith(aperture: double.tryParse(apertureTec.text));
+      var val = double.tryParse(apertureTec.text);
+      state = state.copyWith(aperture: val != null && val > 0 ? val : -1);
     });
     lensTec.addListener(() {
-      state = state.copyWith(lens: double.tryParse(lensTec.text));
+      var val = double.tryParse(lensTec.text);
+      state = state.copyWith(lens: val != null && val > 0 ? val : -1);
     });
     distanceTec.addListener(() {
-      state = state.copyWith(distance: double.tryParse(distanceTec.text));
+      var val = double.tryParse(distanceTec.text);
+      state = state.copyWith(distance: val != null && val > 0 ? val : -1);
     });
     circleTec.addListener(() {
-      state = state.copyWith(circle: double.tryParse(circleTec.text));
+      var val = double.tryParse(circleTec.text);
+      state =
+          state.copyWith(circle: val != null && val > 0 && val <= 1 ? val : -1);
     });
   }
 
@@ -58,11 +63,32 @@ class _HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  double _result = 0;
+  double get result => _result;
+  set result(double val) {
+    _result = val;
+    notifyListeners();
+  }
+
+  double _r1 = 0;
+  double get r1 => _r1;
+  set r1(double val) {
+    _r1 = val;
+    notifyListeners();
+  }
+
+  double _r2 = 0;
+  double get r2 => _r2;
+  set r2(double val) {
+    _r2 = val;
+    notifyListeners();
+  }
+
   bool checkFields() {
-    return (state.aperture == null ? false : true) &&
-        (state.circle == null ? false : true) &&
-        (state.distance == null ? false : true) &&
-        (state.lens == null ? false : true);
+    return (state.aperture == null || state.aperture == -1 ? false : true) &&
+        (state.circle == null || state.circle == -1 ? false : true) &&
+        (state.distance == null || state.distance == -1 ? false : true) &&
+        (state.lens == null || state.lens == -1 ? false : true);
   }
 
   String? validateCircle(String value) {
@@ -101,7 +127,32 @@ class _HomeViewModel extends ChangeNotifier {
     }
   }
 
-  void calculate() {}
+  void clearAll() {
+    lensTec.clear();
+    distanceTec.clear();
+    apertureTec.clear();
+    circleTec.clear();
+    result = 0;
+    r1 = 0;
+    r2 = 0;
+  }
+
+  void calculate() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    r1 = (state.distance! * state.lens! / 1000 * state.lens! / 1000) /
+        (state.lens! / 1000 * state.lens! / 1000 +
+            state.aperture! *
+                (state.distance! - state.lens! / 1000) *
+                state.circle! /
+                1000);
+    r2 = (state.distance! * state.lens! / 1000 * state.lens! / 1000) /
+        (state.lens! / 1000 * state.lens! / 1000 -
+            state.aperture! *
+                (state.distance! - state.lens! / 1000) *
+                state.circle! /
+                1000);
+    result = r2 - r1;
+  }
 }
 
 class Home extends StatelessWidget {
@@ -111,6 +162,7 @@ class Home extends StatelessWidget {
     //var width = MediaQuery.of(context).size.width;
     var viewModel = context.watch<_HomeViewModel>();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text("Рассчитать ГРИП",
             style: Theme.of(context).primaryTextTheme.titleMedium),
@@ -139,6 +191,7 @@ class Home extends StatelessWidget {
                     Expanded(
                       child: Column(children: [
                         TextFormField(
+                          style: Theme.of(context).primaryTextTheme.bodyLarge,
                           //textAlign: TextAlign.center,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           controller: viewModel.circleTec,
@@ -172,6 +225,7 @@ class Home extends StatelessWidget {
                     Expanded(
                       child: Column(children: [
                         TextFormField(
+                          style: Theme.of(context).primaryTextTheme.bodyLarge,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           controller: viewModel.apertureTec,
                           inputFormatters: [
@@ -209,6 +263,7 @@ class Home extends StatelessWidget {
                     Expanded(
                       child: Column(children: [
                         TextFormField(
+                          style: Theme.of(context).primaryTextTheme.bodyLarge,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           controller: viewModel.lensTec,
                           inputFormatters: [
@@ -239,6 +294,7 @@ class Home extends StatelessWidget {
                     Expanded(
                       child: Column(children: [
                         TextFormField(
+                          style: Theme.of(context).primaryTextTheme.bodyLarge,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           controller: viewModel.distanceTec,
                           inputFormatters: [
@@ -267,17 +323,151 @@ class Home extends StatelessWidget {
                     ),
                   ],
                 ),
-                const Padding(padding: EdgeInsets.only(top: 20)),
+                const Padding(padding: EdgeInsets.only(top: 15)),
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
+                        onPressed: viewModel.clearAll,
+                        child: const Text("Очистить все"),
+                      ),
+                    ),
+                  ],
+                ),
+                //const Padding(padding: EdgeInsets.only(top: 5)),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            disabledBackgroundColor: Theme.of(context)
+                                .disabledColor // Background Color
+                            ),
                         onPressed: viewModel.checkFields()
                             ? viewModel.calculate
                             : null,
                         child: const Icon(Icons.check),
                       ),
                     ),
+                  ],
+                ),
+                const Padding(padding: EdgeInsets.only(top: 20)),
+                const Divider(
+                  thickness: 2,
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Глубина резкости:",
+                            style: Theme.of(context).primaryTextTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                  viewModel.result
+                                      .toStringAsFixed(3)
+                                      .toString(),
+                                  style: Theme.of(context)
+                                      .primaryTextTheme
+                                      .bodyLarge),
+                              Text(" м",
+                                  style: Theme.of(context)
+                                      .primaryTextTheme
+                                      .bodyLarge),
+                            ],
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+                const Padding(padding: EdgeInsets.only(top: 10)),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Ближняя граница:",
+                            style: Theme.of(context).primaryTextTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(viewModel.r1.toStringAsFixed(3).toString(),
+                                  style: Theme.of(context)
+                                      .primaryTextTheme
+                                      .bodyLarge),
+                              Text(" м",
+                                  style: Theme.of(context)
+                                      .primaryTextTheme
+                                      .bodyLarge),
+                            ],
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Дальняя граница:",
+                            style: Theme.of(context).primaryTextTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(viewModel.r2.toStringAsFixed(3).toString(),
+                                  style: Theme.of(context)
+                                      .primaryTextTheme
+                                      .bodyLarge),
+                              Text(" м",
+                                  style: Theme.of(context)
+                                      .primaryTextTheme
+                                      .bodyLarge),
+                            ],
+                          ),
+                        ],
+                      ),
+                    )
                   ],
                 )
               ]),
